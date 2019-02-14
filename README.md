@@ -7,4 +7,4 @@ Please let me know if you encounter problems.  I am planning to port this code t
 The paper for this work is:
 Kelly, D., A. Vatsa, W. Mayham, and T. Kazic, 2016. Extracting complex
 phenotypes from images. _Mach. Vision Appl._, *27*: 145--156,
-[doi:10.1007/s00138-015-0718-6](open access paper).
+doi:10.1007/s00138-015-0718-6.
