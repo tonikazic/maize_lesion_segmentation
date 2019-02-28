@@ -1,0 +1,2 @@
+wav_dpth,nav_mu,nav_lambda,nav_thresh,nav_its,div_thresh,cont_its
+4,0.02,0.02,1000,10,-50,25

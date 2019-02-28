@@ -1,0 +1,2 @@
+wav_dpth,nav_mu,nav_lambda,nav_thresh,nav_its,div_thresh,cont_its,cont_alpha,l_size,u_size
+4,0.02,0.02,1000,35,-65,25,0.8,10,50000

@@ -1,0 +1,35 @@
+# this is
+# /Volumes/d/code/image_processing/segmentation/segment_pipe/flow.org
+
+* figuring out where all the code is and why there is an apparently bogus value passed <2018-02-08 Thu> :toni:
+
+
++ segment_call.m calls
+   + mask_rough --- built-in?
+   + multires_sink [[file:../segmentation/multires_sink.m]]
+      + image = expand_im(image,depth); 
+      + imfilter(image,sh,'symmetric');
+      + navier_stokes(del_x,del_y,mu,lambda,thresh,its,'off');
+      + in loop,
+         + imfilter(daub_im{i,1},sv,'symmetric');  (2x)
+         + navier_stokes(del_x,del_y,0.02,0.02,1000,25,'off');
+         + navx_stack(:,:,i+1) = kron(nav_cell{i+1,2},ones(2^i)); (2x)
+         + div_im(:,:,i+1) = kron(divergence(nav_cell{i+1,2},nav_cell{i+1,1}),ones(2^i));
+
+
+   + BUT multires_sink [[file:multires_sink.m]] is later, says  --- says "work in
+     progress, not all arrays assigned are used":
+      + image = mat2gray(expand_im(image,depth))*255; 
+      + imfilter(image,sh,'symmetric');
+      + navier_stokes(del_x,del_y,mu,lambda,thresh,its,'off');
+      + in loop,
+         + imfilter(daub_im{i,1},sh,'symmetric');  (2x)
+         + navier_stokes(del_x,del_y,mu,lambda,thresh,its,'off');
+         + then changes to kern
+         + navx_stack(:,:,i+1) = conv2(kron(nav_cell{i+1,2},ones(2^i)),kern,'symmetric'); (2x)
+         + div_im(:,:,i+1) = conv2(kron(divergence(nav_cell{i+1,2},nav_cell{i+1,1}),ones(2^i)),kern,'symmetric');
+     So conv2 used.  
+
+
+   + snake_seg, older is [[file:../segmentation/snake_seg.m]], newer is [[file:snake_seg.m]]
+   + pink_bounds, older is [[file:../segmentation/pink_bounds.m]], newer is [[file:pink_bounds.m]]

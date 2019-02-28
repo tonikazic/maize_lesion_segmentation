@@ -1,0 +1,408 @@
+#+title: Notes on Batchifying Derek's Code and Building the Segmentation Pipeline
+
+This file was [[file:~linh/me/master_linh.org][master_linh.org]], and a copy remains in her directory.  But
+this is now the current file for processing the lesion images into data.
+
+<2016-09-10 Sat>
+
+
+
+* Moving directories around <2016-09-10 Sat>
+
+[[file:/athe/c/maize/image_processing/]] --> [[file:/athe/c/maize/miscellany/misc_old_image_processing]]
+
+[[]]file:/athe/c/maize/image_analysis/analysis discarded since it was that
+crummy CRKIT-1.5 stuff that never worked.
+ 
+file:/athe/c/maize/image_analysis/{miscellany,segmentatn}discarded as empty
+
+
+We renamed the remainder to:
+
+[[file:/athe/c/maize/image_analysis/]]  --> [[file:/athe/c/maize/analysis_images]]
+
+
+and then cleaned up the directory so we would have a better tree for the
+image processing output:
+
+
+file:/athe/c/maize/image_analysis/{conversion,masking} -->  [[file:/athe/c/maize/miscellany/misc_old_image_analysis/{conversion,masking}.tar.bz2]]
+
+
+
+#+BEGIN_SRC this takes a while!
+$ pwd
+/athe/c/maize/analysis_images
+$ tar -cjf /athe/c/maize/miscellany/misc_old_image_analysis/masking.tar.bz2 masking &
+$ tar -cjf /athe/c/maize/miscellany/misc_old_image_analysis/conversion.tar.bz2 conversion &
+#
+# an su step to remove the source directories 
+# after checking that the output is in the right place
+#+END_SRC
+
+
+
+* Get the latest dcraw.c <2016-09-10 Sat>
+
+Derek's copy is in [[file:/athe/d/derek/derek_desktop_mtlb/dcraw.c][version 9.16]]; we've placed the current version, [[file:./dcraw.c][9.27]], in
+this directory.
+
+Dave Coffin's page is [[https://www.cybercom.net/~dcoffin/dcraw/]].
+
+
+
+
+
+
+
+
+
+
+* project direction
+
+
+** lesion 
+
+*** running todo's
+
+**** DONE stuff: 
+
+both masks on original image, which remove background except
+tape, injuries, midribs. Convert to binary at 0.4 which seems to work
+better than default 0.5 luminance. Regionprops the binary image. Collect
+output data into csv table. Parallel plot. Scatter plot. All of these were
+done on one image in the 18 test, DSC_1037, because :derek:'s code works
+well with this one. 
+
+DONE process other images in the 18 test. Everyone has a parallel plot and
+a scatter plot matrix now. 
+
+
+**** GNG automate: write matlab function(s)
+     + for loops
+     + functions
+     + file input/output
+     + figure out how to make matlab process csv better
+
+
+**** TODO read about dimension selection 
+
+**** TODO discard uninformative dimensions
+     + from reading
+     + the ones with tight distribution across the 18 test
+     + make a little png movie to watch scatter plots change. 
+ 
+**** TODO extract other dimensions
+     + RGB
+     + Lab
+     + x/y
+     + from reading
+
+**** TODO make 3D Lab plots for the 18
+  
+**** TODO start working on decision tree to better segmentation
+
+     + mask and antimask to see what the mask missed
+     + guess customization parameters by phenotype class
+     
+**** TODO discard junk and midrib
+
+
+*** in a nutshell
+
+:derek:'s code takes in images, parameters, output dir.
+Background (blue plate, barcode, color plate) is masked, producing an
+image of leaf only.
+After applying lesion mask, outputs are pink and mask. 
+   + pink: pink border of lesions and midrib
+   + mask: mask on area other than lesions and midrib.
+Segmented objects are lesions and midrib. 
+
+:linh:'s job is to
+   + From pipeline: get image subdir/files, parameter file, output dir,
+     experiment id. 
+   + get names image files in image dir. 
+   + count number of parameters n
+   + make any needed dirs
+   + call segment_call/function to calculate masks
+   + apply masks to images to get semeted lesions
+   + write out segmented lesions nicely (?)
+   + tell pipleline done so it can exit and give the data back: mysql
+     data, filenames of lesions
+
+
+*** where things are
+
++ [[file:../papers/current/image_processing/code.org][code.org index file]], [[file:/athe/d/derek/code/image_processing/segmentation/segment_pipe/segment_call.m][top level of the code]]
+
++ we've now migrated [[file:/athe/d/derek/code/image_processing/segmentation/segment_pipe/linh_segment_call.m][linh_segment_call.m]] to [[file:/athe/d/derek/code/image_processing/segmentation/segment_pipe/batch_segment_call.m][batch_segment_call.m]] to more
+  accurately reflect what we want it to do. <2016-09-10 Sat>
+
++ the next step after fixing directory management will be to save the data
+  in a good form <2016-09-10 Sat>
+
++ [[file:../papers/current/image_processing/data.org][data]]
+
++ [[file:../papers/current/image_processing/notes.org][notes]]
+
++ [[file:/athe/d/derek/code/image_processing/segmentation/segment_pipe/18_data][data_file of the 18 test images]]
+
++ [[file:/athe/d/derek/code/image_processing/segmentation/segment_pipe/parameters][parameters file for the 18 test images]]
+
++ [[file:/users/linh/me/work/image_processing/dereks_code.org][linhs comments]]  (file missing, may be in /athe/d/derek/ ..)
+
+
+
+
+
+#+end_rmk
+
+
+
+
+
+
+
+
+
+** steps for lesion data, reify in code
+
+*** DONE read introductions to matlab programming 		       :linh:
+
+
+*** GNG extract lesions from segmented images and write appropriate output data :avi: and :linh:
+
++ [[file:../image_processing/code.org][:derek:'s code]] should be pretty clear abot the output data for the
+  segmented images
+
++ need to write a matlab script to save lesions in useful forms:
+
+  + csv ***
+  + matrices (saved in files)
+  + mysql tables ***
+  + objects (saved in files)
+
+We want to avoid repetitive processing and make sure we have descriptive,
+consistent file names.
+
+
++ want to make sure each lesion is uniquely and consistently identified in
+  all output forms
+
++ remove midrib and junk
+
+
+*** GNG dig out previous matlab code that characterized lesions 	:avi:
+
+regionprops!
+
+
+
+*** DONE apply the regionprops code to the segmented lesions to get matrices of lesion properties :linh: and :avi:
+  
+
+*** GNG see what properties (= dimensions) best characterize the phenotypes
+
+   + some genotypes will have a mix of phenotypes
+
+   + some have essentially the same phenotype, but within a range of values
+
+   + some properties will be uninformative (strongly covary with another
+     property)
+
+
+   + look at univariate distributions of each property for each genotype
+     --- eliminate properties that don't change
+
+   + check covariances
+
+   + characterize statistical properties of each dimension
+
+   + parallel plots and other visualizations
+
+
+*** TODO see what other properties better characterize the phenotypes  :linh:
+
+   + pretty sure we don't have anything for spatial distribution of lesions
+     on leaves
+
+   + what else?  it will pop up
+
+
+    
+*** TODO find, or devise and implement, good similarity scoring :linh:, :avi:, :linh:
+
+
+*** TODO compute similarities among phenotypes by clustering 	       :linh:
+
+
+*** TODO figure out similarity scoring and clustering for mixtures of real and categorical data :linh:, :avi:, :toni:
+     
+
+
+
+** Reading notes on clustering and data analysis:  
+
+*** Jain's review on data clustering: /athe/b/zu_lessen/big_data/big_data_clustering/jain1999.pdf
+
+
+
+*** Agresti's book on categorical data analysis
+
+
+*** Ideas
+
+  + symbolic genotypes
+
+  + :ann:'s SNPs?
+
+  + categorical data from medicinal plants (plant parts, cultural traits,
+    . . . )
+
+  
+
+
+
+
+
+
+
+
+* project experiments
+
+** Background <2015-09-07 Mon>
+
+*** Complex phenotype:
+
++ Why are we doing this?
+
++ What do complex phenotypes have to do with causation?
+
++ The applied side?
+
+
+
+*** Lesions mimic stuff: 
+ 
+**** GNG Read about basics of lesion mimics genetics 		       :linh:
++ How lesions mimics has been used as classical genetic tools 
++ How lesions mimics genetics work
+
+#+begin_rmk <2015-09-11 Fri>
+Found Jerry's paper (1975) and filed under maize/lesions. 
+#+end_rmk
+***** GNG read up on lesion mimics, starting in [[/athe/b/zu_lesen/maize/lesions][reprint collection]]
+
+#+begin_rmk <2015-09-11 Fri>
+Read johal2007
+
+#+end_rmk
+**** DONE Read most recent grant proposal on lesion mimics project from lab :linh:
+
+**** GNG Read :derek:'s manusscript on image processing to get on track
+     
+
+** Lesion 
+
+#+begin_rmk <2016-02-12 Fri> automate stuff with for loop
+
+All parallel plots and scatter plot matrices for the 18 test images are in
+[[file:/athe/d/linh/image_processing/results/output_apply_mask3/lesion][lesion directory]]. 
+
+
+Complete for loop for applying mask. Need to write this into a
+function. Code in d/linh/image_processing/code/apply_mask.m
+
+Working on for loop to automate regionprops, parallel plots, plot
+matrix. File input/output seems screwy. Need to work on this then make it a
+function, too. Code in d/linh/image_processing/code/temp_regionprops.m
+
+And do not name anything identical to a factory function. Matlab favors
+homebrew and will call it instead of their own function. 
+
+#+end_rmk
+
+
+#+begin_rmk <2016-02-03 Wed> plot data from csv file
+First attempt to read in csv file and make scatter plot of each column
+(variable) against another. 
+
+Rough code: see [[file:/Volumes/d/linh/image_processing/notes/dereks_code.org][dereks_code.org]]
+which is not very elegant. I had to turn the csv into a matlab table, then
+turn the table into an array, in which step lose the variables'names
+(column header). Figure out a better way to do this, or try in R. 
+
+Result scatter plots:
+[[file:/Volumes/d/linh/image_processing/results/output_apply_mask2/regionprops/DSC_1037_plotmatrix.png][DSC_1037_plotmatrix.png]]
+
+We are doing this because we want to see pairwise
+relationships/covariation, if exist, between properties. The ultimate goal
+is to pick out informative dimensions. 
+
+The diagonal line consists of histogram of each property. There is clearly
+a variety of distribution modes. 
+
+The scatter plots are promising. Some of them show a resemblance to a leaf
+with midrib, hinting a way to remove it. 
+
+
+#+end_rmk
+
+
+
+#+begin_rmk <2016-02-02 Tue> regionprops
+ 
+Code 1st version: [[file:/Volumes/d/linh/image_processing/code/temp_regionprops.m][temp_regionprops.m]]
+
+First attempt to regionprops lesion properties and paralel plot them. 
+
+#+end_rmk
+
+
+#+begin_rmk <2015-10-22 Thu> apply mask
+
+See dereks_code.org
+
+#+end_rmk
+
+
+
+#+begin_rmk how to fish out lesions correctly <2015-10-02 Fri>
+See dereks_code.org. 
+
+Start with mask, apply on top of original images, which probably have 3 to
+4 channels (RGB, transparency), and get lesions out, maybe by cross
+products of matrices. 
+
+Pink will come in handy later to check how good decision making for each
+lesion type is. 
+
+
+
+#+end_rmk
+
+
+#+begin_rmk <2015-09-24 Thu> See me/work/image_processing/dereks_code.org
+Goal: write out lesions, their parameters and coordinates nicely in mtlb, mysql, and csv formats.  
+How?
+
+#+end_rmk
+
+
+#+begin_rmk <2015-09-11 Fri> See me/work/image_processing/dereks_code.org
+Trying to run derek's code for 18 tested images. 
+How to make mtlb understand filepath?
+Where is derek's output dir?
+
+
+#+end_rmk
+
+
+
+
+
+
+
+
+
+

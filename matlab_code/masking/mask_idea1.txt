@@ -1,0 +1,40 @@
+From: "Kazic, Toni" <kazict@missouri.edu>
+Date: September 7, 2012 6:29:47 AM CDT
+To: "Kazic, Toni" <kazict@missouri.edu>
+Cc: "Vatsa, Avimanyou Kumar (MU-Student)" <akvhxd@mail.missouri.edu>, "Kelly, Derek E. (MU-Student)" <dek343@mail.missouri.edu>
+Subject: Re: still better  masking idea
+
+sorry, I'm too excited.
+
+I should have said, zero out.
+
+So it's more like:
+
+     if pixel B > B_threshold && pixel R, G <= their thresholds && pixel adjacent to N blue 
+ixels, then set pixel RGB = 0 in all channels. Oops, we shouldmake sure 000 won't cause problems --- otherwise, -1.
+
+Then will have four contiguosblocksof non-zero pixels.  Block with lots of white is barcode.  Blocks with black are color gauge (that's why I worried about 000).  Rest is leaf + carpet tape. Same trick for carpet tape.
+
+What should N be?  Look at leaves with damage to get an idea of how sharp the corners are.
+
+cheers,
+
+Toni
+
+On Sep 7, 2012, at 4:40, "Kazic, Toni" <kazict@missouri.edu> wrote:
+
+hey!
+
+we just want the important logical parts of the image ---- barcode, color gauge, leaf.  So if we subtracted the pixels belonging to the blue background and looked at the remaing pixels, we should see three groups of pixels.  These would then be written out to their own matrices.
+
+
+what do you think?
+
+cheers,
+
+Toni
+
+
+cheers,
+
+Toni
