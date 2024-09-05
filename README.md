@@ -2,7 +2,7 @@
 
 MatLab code to segment maize leaf lesions from background leaf tissue.  These directories include a number of other functions that may be broadly useful (and more than one false start!).  Sample data are also provided.
 
-Please let me know if you encounter problems.  I am planning to port this code to OpenCV in 2019 and would appreciate any heads-ups you can provide.
+Please let me know if you encounter problems.  Chimdi Walter Ndubuisi is now extending and improving this code and porting to Python.
 
 The paper for this work is:
 Kelly, D., A. Vatsa, W. Mayham, and T. Kazic, 2016. Extracting complex
